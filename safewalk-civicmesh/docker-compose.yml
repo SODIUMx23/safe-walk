@@ -1,0 +1,137 @@
+name: safewalk-civicmesh
+
+services:
+  init-secrets:
+    image: alpine:3.22
+    restart: "no"
+    volumes:
+      - app-secrets:/run/shared
+      - ./infra/secrets/init.sh:/init-secrets.sh:ro
+    entrypoint: ["/bin/sh", "/init-secrets.sh"]
+    network_mode: none
+
+  db:
+    build:
+      context: .
+      dockerfile: infra/db/Dockerfile
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: safewalk
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_admin_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - app-secrets:/run/secrets:ro
+    ports: ["127.0.0.1:5432:5432"]
+    depends_on:
+      init-secrets: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d safewalk"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
+    stop_grace_period: 40s
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    user: "0:0"
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/safewalk-entrypoint.sh"]
+    volumes:
+      - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./infra/mosquitto/entrypoint.sh:/safewalk-entrypoint.sh:ro
+      - mqtt-data:/mosquitto/data
+      - app-secrets:/run/secrets:ro
+    ports: ["127.0.0.1:1883:1883", "127.0.0.1:9001:9001"]
+    depends_on:
+      init-secrets: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_pub -h 127.0.0.1 -u safewalk -P \"$$(cat /run/secrets/mqtt_password)\" -t safewalk/health -n -q 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+
+  minio:
+    build:
+      context: .
+      dockerfile: infra/minio/Dockerfile
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER_FILE: /run/secrets/minio_user
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/minio_password
+      MINIO_BROWSER_REDIRECT_URL: "${MINIO_BROWSER_REDIRECT_URL:-http://localhost:9002}"
+    volumes:
+      - minio-data:/data
+      - app-secrets:/run/secrets:ro
+    ports: ["127.0.0.1:9000:9000", "127.0.0.1:9002:9002"]
+    depends_on:
+      init-secrets: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  redis:
+    # Redis >=8 offers an OSI AGPLv3 option; do NOT substitute non-OSI 7.4.
+    image: redis:8.2-alpine
+    restart: unless-stopped
+    command: ["/bin/sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$(cat /run/secrets/redis_password)\""]
+    volumes:
+      - redis-data:/data
+      - app-secrets:/run/secrets:ro
+    ports: ["127.0.0.1:6379:6379"]
+    depends_on:
+      init-secrets: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$(cat /run/secrets/redis_password)\" redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    init: false
+    environment:
+      APP_ENV: "${APP_ENV:-production}"
+      DATA_DIR: /app/data
+      POSTGRES_HOST: db
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      REDIS_PASSWORD_FILE: /run/secrets/redis_password
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      MQTT_PASSWORD_FILE: /run/secrets/mqtt_password
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ROOT_USER_FILE: /run/secrets/minio_user
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/minio_password
+      DEVICE_API_TOKEN_FILE: /run/secrets/device_api_token
+      CAREGIVER_API_TOKEN_FILE: /run/secrets/caregiver_api_token
+      ARCHIVE_KEY_FILE: /run/secrets/archive_key
+      WS_ALLOWED_ORIGINS: "${WS_ALLOWED_ORIGINS:-}"
+      TELEMETRY_RETENTION_DAYS: "${TELEMETRY_RETENTION_DAYS:-7}"
+      INCIDENT_RETENTION_DAYS: "${INCIDENT_RETENTION_DAYS:-30}"
+    volumes:
+      - backend-data:/app/data
+      - app-secrets:/run/secrets:ro
+    ports: ["${BACKEND_BIND:-0.0.0.0}:${BACKEND_PORT:-8000}:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      minio: {condition: service_healthy}
+      mosquitto: {condition: service_healthy}
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    stop_grace_period: 45s
+
+volumes:
+  app-secrets:
+  postgres-data:
+  mqtt-data:
+  minio-data:
+  redis-data:
+  backend-data:

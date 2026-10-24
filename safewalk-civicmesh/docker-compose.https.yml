@@ -1,0 +1,26 @@
+# Optional local HTTPS front end for a real phone on the same LAN.
+# First generate certs with scripts/start_mobile_demo.ps1 (Windows + mkcert).
+# The launcher also sets BACKEND_BIND=127.0.0.1 to keep raw HTTP off the LAN.
+services:
+  https:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["8443:8443"]
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+    depends_on:
+      backend: {condition: service_healthy}
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    # Stock Caddy has a NET_BIND_SERVICE file capability; DAC_OVERRIDE lets
+    # container root read owner-only host certs. Their mount stays read-only.
+    cap_add: ["NET_BIND_SERVICE", "DAC_OVERRIDE"]
+    healthcheck:
+      # Only the container's non-sensitive loopback readiness probe skips CA
+      # verification. Phone/laptop browsers MUST trust the generated CA.
+      test: ["CMD", "wget", "--no-check-certificate", "-q", "-O", "/dev/null", "https://localhost:8443/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
