@@ -1,0 +1,13 @@
+{
+	# Certificates are generated on the user's laptop, not issued by a cloud.
+	auto_https off
+	admin off
+}
+
+https://:8443 {
+	tls /certs/safewalk.pem /certs/safewalk-key.pem
+	header Referrer-Policy "no-referrer"
+	reverse_proxy backend:8000
+	# Caddy preserves the incoming Host and handles WebSocket upgrades.
+	# Do not change Host to 'backend:8000': the API verifies WS Origin/Host.
+}

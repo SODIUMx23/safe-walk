@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Experimental, accessible pedestrian assistance. Use with a cane or guide.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>SafeWalk · Specs Node</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <style>
+    :root{color-scheme:dark;--accent:#d6fb78;--muted:#949b99;--line:#232826;--danger:#ff968b;font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#000000;color:#f5f8f5}
+    *{box-sizing:border-box}body{margin:0;background:#000000;min-height:100dvh;padding:env(safe-area-inset-top) max(20px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(20px,env(safe-area-inset-left))}button,input{font:inherit}button{cursor:pointer;color:inherit;background:#101310;border:1px solid #343c34;border-radius:12px;padding:12px 17px;min-height:48px;font-weight:650}button:disabled{cursor:wait;opacity:.5}button.primary{background:var(--accent);color:#101608;border-color:var(--accent)}button.danger{background:#341411;border-color:#8a3f35;color:#ffc2b9}a{color:var(--accent)}:focus-visible{outline:3px solid var(--accent);outline-offset:5px}header{height:84px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}.mark{height:38px;width:38px;fill:none;stroke:var(--accent);stroke-width:1.7}.brand{flex:1;line-height:1.25;font-weight:750;letter-spacing:-.5px}.brand small{display:block;color:var(--muted);font-size:10px;font-weight:500;letter-spacing:2px;margin-top:4px}.icon-btn{padding:9px 12px;font-size:14px}main{max-width:700px;margin:auto}.status-row{display:flex;justify-content:space-between;align-items:center;padding:20px 0;font-size:12px;letter-spacing:.5px;color:var(--muted)}.status{display:flex;align-items:center;gap:8px}.dot{width:7px;height:7px;border-radius:50%;background:#6d7570}.dot.on{background:var(--accent);box-shadow:0 0 14px #d6fb7840}.pill{border:1px solid var(--line);padding:5px 9px;border-radius:20px;font-size:10px;color:#c5cfc5}.tactile{min-height:42dvh;touch-action:none;user-select:none;-webkit-user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;isolation:isolate;border-radius:20px}.radar{width:min(47vw,205px);height:170px;opacity:.68}.tactile h1{font-size:clamp(24px,5vw,36px);font-weight:550;letter-spacing:-1.2px;text-align:center;line-height:1.3;max-width:600px;margin:20px 0 10px}.tactile p{color:var(--muted);font-size:13px;margin:0 0 26px;text-align:center}.tactile.active{box-shadow:inset 0 0 0 1px #d6fb7820}.eyebrow{font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase}.meters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.meter{padding:16px;border:1px solid var(--line);border-radius:12px}.meter-label{display:flex;justify-content:space-between;font-size:10px;letter-spacing:1.4px;color:#b7c2b5}.meter-value{font-size:25px;letter-spacing:-.8px;margin:8px 0 2px}.meter small{font-size:10px;color:var(--muted)}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.controls button{font-size:12px;padding:12px 9px}.controls .wide{grid-column:1/-1}.help{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid var(--line);margin-top:25px;padding:18px 0;color:var(--muted);font-size:11px}.help b{color:#e0e6de;font-weight:500;display:block;font-size:12px;margin-bottom:3px}.safety{font-size:10px;text-align:center;color:#929a92;margin:10px 0 25px}.camera{position:fixed;bottom:0;left:0;width:1px;height:1px;opacity:.001;pointer-events:none;z-index:-1}dialog{width:min(94vw,580px);background:#070a07;color:#f1f5ed;border:1px solid #35402c;border-radius:20px;padding:26px;max-height:90dvh;overflow:auto}dialog::backdrop{background:#000d;backdrop-filter:blur(9px)}dialog h2{font-size:27px;letter-spacing:-1px;line-height:1.25;margin:8px 0 18px}dialog p{font-size:13px;color:#b0b8ad}dialog label{display:block;font-size:12px;margin:16px 0 7px}dialog input:not([type=checkbox]){width:100%;min-height:46px;background:#000;border:1px solid #343d31;border-radius:9px;color:white;padding:10px 12px}dialog input[type=checkbox]{width:19px;height:19px;accent-color:var(--accent);flex-shrink:0}dialog .check{display:flex;align-items:flex-start;gap:10px;line-height:1.6}dialog .check span{padding-top:1px}dialog .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}dialog details{border-top:1px solid var(--line);padding-top:14px;margin-top:20px;font-size:12px}dialog summary{cursor:pointer;color:#d6dfd0;font-weight:600}dialog .notice{border-left:2px solid var(--accent);padding:9px 12px;background:#11170c;font-size:12px;color:#c4d1b5}.error{color:var(--danger)!important}#critical{position:fixed;inset:auto 20px 15px;background:#35110e;color:#ffd6cf;border-radius:10px;padding:14px;font-size:13px;z-index:10}#critical:empty{display:none}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.offline{color:var(--danger)}.dev-banner{color:#ffd486;font-size:10px;text-align:center;margin:8px 0}.dev-banner:empty{display:none}@media(min-width:800px){header{max-width:700px;margin:auto}.tactile{min-height:390px}.help{font-size:12px}body{padding-bottom:25px}}
+  </style>
+</head>
+<body>
+  <header>
+    <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 12v16L20 37 5 28V12Z"/><path d="m11 24 6-12 6 16 6-12M5 20h7m16 0h7"/></svg>
+    <div class="brand">SafeWalk <small>CIVICMESH / SPECS NODE</small></div>
+    <button id="settingsButton" class="icon-btn" aria-label="Open settings and permissions">Settings</button>
+    <button id="stopButton" class="icon-btn" disabled>Stop</button>
+  </header>
+  <main>
+    <div id="devBanner" class="dev-banner"></div>
+    <div class="status-row"><span class="status"><i id="statusDot" class="dot" aria-hidden="true"></i><span id="connectionStatus">NOT MONITORING</span></span><span class="pill" id="cacheStatus">VOICE CACHE · 0 / 40</span></div>
+    <section id="touchSurface" class="tactile" role="application" tabindex="0" aria-label="Guidance touch canvas. Tap to replay, double tap for scene, two-finger tap for Rupee Guard, hold two seconds for emergency. Alternative buttons follow.">
+      <span class="eyebrow" id="modeLabel">YOUR EVERYDAY MOBILITY COMPANION</span>
+      <svg class="radar" viewBox="0 0 240 180" aria-hidden="true">
+        <defs><linearGradient id="fade" x2="0" y2="1"><stop stop-color="#d6fb78" stop-opacity=".17"/><stop offset="1" stop-color="#d6fb78" stop-opacity="0"/></linearGradient></defs>
+        <path d="M120 163 43 30Q120-10 197 30Z" fill="url(#fade)"/>
+        <g fill="none" stroke="#38452c" stroke-width="1"><path d="M24 109a110 110 0 0 1 192 0M48 126a83 83 0 0 1 144 0M72 143a55 55 0 0 1 96 0"/><path d="M120 163V13M120 163 43 30M120 163 197 30" stroke-dasharray="3 6"/></g>
+        <circle cx="120" cy="163" r="5" fill="#d6fb78"/><circle cx="120" cy="163" r="11" fill="none" stroke="#d6fb78" stroke-opacity=".3"/>
+        <path d="m112 73 8-8 8 8" fill="none" stroke="#d6fb78" stroke-width="2"/>
+      </svg>
+      <h1 id="guidance" aria-live="polite" aria-atomic="true">A little more awareness.<br>A little more independence.</h1>
+      <p id="guidanceDetail">Start a session to enable experimental guidance.</p>
+    </section>
+    <div class="meters" aria-label="Sensor status">
+      <div class="meter"><div class="meter-label">HEADSPACE <span>↗ 18°</span></div><div id="headspaceValue" class="meter-value">—</div><small id="headspaceDetail">No metric range sensor</small></div>
+      <div class="meter"><div class="meter-label">GROUND PROFILE <span>⌁</span></div><div id="groundValue" class="meter-value">—</div><small id="groundDetail">Drop depth unavailable</small></div>
+    </div>
+    <div class="controls">
+      <button id="replayButton">Replay guidance</button><button id="describeButton">Describe scene</button>
+      <button id="rupeeButton" aria-pressed="false">Rupee Guard · Off</button><button id="calibrateButton">Calibrate neutral tilt</button>
+      <button id="sosButton" class="danger wide">Emergency caregiver alert</button>
+    </div>
+    <div class="help" aria-label="Touch gestures"><div><b>One tap</b>Replay the last cue</div><div><b>Double tap</b>Describe the scene</div><div><b>Two-finger tap</b>Toggle Rupee Guard</div><div><b>Hold for 2 seconds</b>Send caregiver SOS</div></div>
+    <p class="safety">EXPERIMENTAL ASSISTIVE AID · KEEP USING YOUR CANE OR GUIDE<br>No phone sonar. No clear-path guarantee. No automatic emergency-service dispatch.</p>
+  </main>
+  <video id="camera" class="camera" autoplay muted playsinline aria-hidden="true"></video>
+  <canvas id="frameCanvas" width="640" height="480" hidden></canvas>
+  <div id="critical" role="alert" aria-live="assertive"></div>
+  <dialog id="setupDialog" aria-labelledby="setupTitle">
+    <span class="eyebrow">SAFEWALK / GET CONNECTED</span><h2 id="setupTitle">Your phone. A more aware companion.</h2>
+    <p>Mount the back camera facing your path. This is an experimental camera/IMU aid, <strong>not a cane replacement</strong>. It cannot measure sonar or reliably detect a 40 cm drop, a wire, or every hazard.</p>
+    <p class="notice">Camera snapshots and precise GPS are sent to your self-hosted caregiver hub while monitoring. Keep the app foregrounded. Use open-ear or bone-conduction audio at a low volume.</p>
+    <label for="apiToken">Device access token (kept only for this browser session)</label><input id="apiToken" type="password" autocomplete="off" spellcheck="false" aria-describedby="tokenHelp"><p id="tokenHelp">Required for the Docker production stack. Never use an unauthenticated development server with real people.</p>
+    <label class="check"><input id="consentSession" type="checkbox"><span>I consent to camera/GPS telemetry and understand this is experimental. I will keep using my usual mobility aid.</span></label>
+    <label class="check"><input id="consentBlackbox" type="checkbox"><span>Enable a rolling 10-second video buffer in RAM. On SOS or an enabled impact alert, send the clip to my caregiver's encrypted archive.</span></label>
+    <label class="check"><input id="consentImpact" type="checkbox"><span>Automatically send a <strong>suspected impact</strong> alert above 3.5 g. A dropped phone can trigger it. This does not call 112.</span></label>
+    <details><summary>KinVoice · voice options & consent</summary>
+      <p>All 40 primitives can be decoded into local RAM. The system voice is synthetic, not cloned. A 10-second sample produces a <strong>simulated reference fingerprint only</strong>. To hear a loved one, enroll and upload 40 actual recordings through the API; see the README.</p>
+      <label for="voiceProfile">Voice profile ID</label><input id="voiceProfile" value="default" autocomplete="off" spellcheck="false">
+      <label for="audioSample">10-second voice sample (8–12 seconds)</label><input id="audioSample" type="file" accept="audio/*">
+      <label class="check"><input id="voiceConsent" type="checkbox"><span>The speaker explicitly consents to this sample and playback use.</span></label>
+      <button id="enrollButton" type="button">Enroll reference sample</button><p id="voiceStatus" role="status"></p>
+    </details>
+    <p id="setupError" role="alert" class="error"></p><div class="actions"><button id="startButton" class="primary">Enable & start session</button><button id="closeSetupButton">Close</button><a href="/portal/" style="align-self:center;font-size:12px">Caregiver hub ↗</a></div>
+  </dialog>
+  <dialog id="panicDialog" aria-labelledby="panicTitle"><span class="eyebrow">BLACKBOX GUARD</span><h2 id="panicTitle">Send a real caregiver alert?</h2><p>This sends your available location and consented video buffer to this hub. It <strong>does not call an ambulance or 112</strong>. If you are in immediate danger, call 112.</p><div class="actions"><button id="confirmPanicButton" class="danger">Send caregiver alert now</button><button id="cancelPanicButton">Cancel</button></div></dialog>
+  <noscript>This application requires JavaScript. Do not rely on it for navigation.</noscript>
+  <script type="module" src="./js/specs_core.js"></script>
+</body>
+</html>
